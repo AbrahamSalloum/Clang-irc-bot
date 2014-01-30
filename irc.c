@@ -101,4 +101,3 @@ he = gethostbyname( hostname );
 addr_list = (struct in_addr **) he->h_addr_list;
 strcpy(ip, inet_ntoa(*addr_list[1]));
 }
-
