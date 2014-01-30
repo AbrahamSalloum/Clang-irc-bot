@@ -16,8 +16,8 @@ int main(int argc, char *argv[]){
 char chan[50]; char ip[100]; char message[512]; int irc_sock; int ret_tprntmsg;
 struct sockaddr_in server;
 
-if((irc_sock = socket(AF_INET,SOCK_STREAM,0)) <0){
-		printf("Could not create socket\n");
+	if((irc_sock = socket(AF_INET,SOCK_STREAM,0)) <0){
+	printf("Could not create socket\n");
 	}
 
 hostip(argv[1],ip);  
@@ -26,7 +26,7 @@ server.sin_family = AF_INET;
 server.sin_port = htons(atoi(argv[2]));
 
 	if(connect(irc_sock, (struct sockaddr *)&server, sizeof(server))){
-		printf("connect error\n");
+	printf("connect error\n");
 	}
 
 pthread_t tprntmsg;
