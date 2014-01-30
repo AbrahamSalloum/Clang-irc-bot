@@ -4,8 +4,8 @@ gcc -lpthread irc.c
 Basic (bad) skeleton for bot, accepts from stdin the following:
 QUIT - quits 
 JOIN #chan - join chan
+PRIVATE <user> - starts private chat with <user>, to exit: JOIN #chan
 <anything else> - public msg to chan
 
 buffer overflows are everywere
-
-output is raw stream
+output is raw  stream

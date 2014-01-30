@@ -42,6 +42,7 @@ while(1){
 fgets(message, sizeof(message), stdin);
 
 	if(!(strncmp(message,"JOIN",4))){
+	sayraw(message, irc_sock);
 	getchan(message, chan, irc_sock);
 	}	
 		else if(!(strncmp(message,"QUIT",4))){
@@ -49,12 +50,14 @@ fgets(message, sizeof(message), stdin);
 		close(irc_sock);
 		return 0; //only exit
 		}
-			else{ 
-			mesg(message,chan,irc_sock);
-			}					
+			else if(!(strncmp(message, "PRIVATE", 7))){
+			getchan(message, chan, irc_sock); 
+			}	
+					else{ 
+					mesg(message,chan,irc_sock);
+					}					
 }
 }
-
 void* prntmsg(void *sock){
 char read[512];
 int irc_sock = (int)sock;
@@ -71,9 +74,9 @@ int irc_sock = (int)sock;
 }
 
 void sayraw(char write[512], int irc_sock){
-if ((send(irc_sock, write, strlen(write),0))<0){ //ALL data sending happens here
-printf("error writing\n"); 
-}
+	if ((send(irc_sock, write, strlen(write),0))<0){ //ALL data sending happens here
+	printf("error writing\n"); 
+	}
 }
 
 void mesg(char write[512], char *chan, int irc_sock){ //public chan msg formatting
@@ -84,7 +87,6 @@ sayraw(privmsg,irc_sock);
 }
 
 void getchan(char join[], char *chan, int irc_sock ){
-sayraw(join, irc_sock); 
 char *hash;
 hash=malloc(50*sizeof(char));
 memset(chan, 0,50);
