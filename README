@@ -1,5 +1,5 @@
 gcc -lpthread irc.c 
-./a.out irc.foonetic.net 6667
+./a.out irc.foonetic.net 6667 (or any other  well behaving server/port combo)
 
 Basic (bad) skeleton for bot, accepts from stdin the following:
 QUIT - quits 
