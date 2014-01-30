@@ -1,0 +1,3 @@
+gcc -lpthread irc.c 
+
+./a.out irc.foonetic.net 6665
