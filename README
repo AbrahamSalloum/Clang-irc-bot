@@ -5,7 +5,7 @@ Basic (bad) skeleton for bot, accepts from stdin the following:
 QUIT - quits 
 JOIN #chan - join chan
 PRIVATE <user> - starts private chat with <user>, to exit: JOIN #chan
-<anything else> - public/private msg to chan
+<anything else> - public/private msg to chan/<user>
 
 buffer overflows are everywere
 output is raw  stream
