@@ -32,8 +32,8 @@ server.sin_port = htons(atoi(argv[2]));
 pthread_t tprntmsg;
 ret_tprntmsg = pthread_create(&tprntmsg,NULL,prntmsg,(void*)irc_sock);
 sleep(1); 
-char authnick[]="NICK greppi\n\r";
-char authuser[]="USER greppi 8 * steve tomet\n\r";
+char authnick[]="NICK uiyonzhu\n\r";
+char authuser[]="USER notabot 8 * nota bot\n\r";
 	sayraw(authnick,irc_sock);
 sleep(1);
 	sayraw(authuser,irc_sock);
@@ -53,6 +53,9 @@ fgets(message, sizeof(message), stdin);
 			else if(!(strncmp(message, "PRIVATE", 7))){
 			getchan(message, chan, irc_sock); 
 			}	
+				else if(!(strncmp(message, "NICK", 4))){
+				sayraw(message, irc_sock);
+				}		
 					else{ 
 					mesg(message,chan,irc_sock);
 					}					
