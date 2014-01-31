@@ -4,6 +4,7 @@ gcc -lpthread irc.c
 Basic (bad) skeleton for bot, accepts from stdin the following:
 QUIT - quits 
 JOIN #chan - join chan
+NICK newnick - changes nick
 PRIVATE <user> - starts private chat with <user>, to exit: JOIN #chan
 <anything else> - public/private msg to chan/<user>
 
