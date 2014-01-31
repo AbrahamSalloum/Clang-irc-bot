@@ -84,7 +84,6 @@ void sayraw(char write[512], int irc_sock){
 
 void mesg(char write[512], char *chan, int irc_sock){ //public chan msg formatting
 char privmsg[512] ; 
-memset(privmsg, 0,sizeof(privmsg)); 
 snprintf(privmsg, sizeof(privmsg), "PRIVMSG %s%s%s%s", chan, " :", write,"\r\n");
 sayraw(privmsg,irc_sock); 
 }
@@ -92,7 +91,6 @@ sayraw(privmsg,irc_sock);
 void getchan(char join[], char *chan, int irc_sock ){
 char *hash;
 hash=malloc(50*sizeof(char));
-memset(chan, 0,50);
 printf("%s\n", join); 
 hash=strtok(join," \n");
 hash=strtok(NULL, " \n");
@@ -104,5 +102,5 @@ struct hostent *he;
 struct in_addr **addr_list;   
 he = gethostbyname( hostname );
 addr_list = (struct in_addr **) he->h_addr_list;
-strcpy(ip, inet_ntoa(*addr_list[1]));
+strcpy(ip, inet_ntoa(*addr_list[0]));
 }
