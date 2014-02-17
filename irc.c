@@ -9,18 +9,23 @@
 void* prntmsg(void *);
 void sayraw(char*, int);
 void mesg(char*, char* , int);
-void hostip(char hostname[1024], char *ip);
+int hostip(char hostname[1024], char *ip);
 void getchan(char join[], char *chan, int irc_sock);  
 
 int main(int argc, char *argv[]){
-char chan[50]; char ip[100]; char message[512]; int irc_sock; int ret_tprntmsg;
+if (argc != 3) {
+        printf("Specify host and port: ./a.out <hostname> <port>\n"); 
+        return 1;
+    }
+char chan[50]; char ip[100]; char message[512]; char authnick[15]; 
+char authuser[35]; int irc_sock; int ret_tprntmsg;
 struct sockaddr_in server;
 
 	if((irc_sock = socket(AF_INET,SOCK_STREAM,0)) <0){
 	printf("Could not create socket\n");
 	}
 
-hostip(argv[1],ip);  
+if ((hostip(argv[1],ip)) == 1) { return 0; };  
 server.sin_addr.s_addr = inet_addr(ip);
 server.sin_family = AF_INET;
 server.sin_port = htons(atoi(argv[2]));
@@ -32,8 +37,8 @@ server.sin_port = htons(atoi(argv[2]));
 pthread_t tprntmsg;
 ret_tprntmsg = pthread_create(&tprntmsg,NULL,prntmsg,(void*)irc_sock);
 sleep(1); 
-char authnick[]="NICK uiyonzhu\n\r";
-char authuser[]="USER notabot 8 * nota bot\n\r";
+snprintf(authnick, sizeof(authnick), "NICK %s\n\r", getenv("USER")); 
+snprintf(authuser, sizeof(authuser), "USER %s 8 * nota not\n\r", getenv("USER")); 
 	sayraw(authnick,irc_sock);
 sleep(1);
 	sayraw(authuser,irc_sock);
@@ -97,10 +102,12 @@ hash=strtok(NULL, " \n");
 strcpy(chan,hash); 
 }
 
-void hostip(char hostname[1024], char *ip){ //no error checking!!
+int hostip(char hostname[1024], char *ip){ //crap error checking!!
 struct hostent *he;     
 struct in_addr **addr_list;   
 he = gethostbyname( hostname );
+if(he == NULL){ printf("No IP\n"); return 1; } 
 addr_list = (struct in_addr **) he->h_addr_list;
 strcpy(ip, inet_ntoa(*addr_list[0]));
+return 0; 
 }
