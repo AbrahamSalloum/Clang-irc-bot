@@ -11,7 +11,8 @@ void sayraw(char*, int);
 void mesg(char*, char* , int);
 int hostip(char hostname[1024], char *ip);
 void getchan(char join[], char *chan, int irc_sock);  
-
+int printt( char read[512]); 
+pthread_mutex_t mutex ; 
 int main(int argc, char *argv[]){
 if (argc != 3) {
         printf("Specify host and port: ./a.out <hostname> <port>\n"); 
@@ -71,13 +72,14 @@ char read[512];
 int irc_sock = (int)sock;
 	while(1){
 	memset(read, 0, sizeof(read)); 
-		recv(irc_sock, read, sizeof(read), 0); //ALL data recv happens here
-		printf("%s",read);
+	recv(irc_sock, read, sizeof(read), 0); //ALL data recv happens here
+	printt(read);
 		if(!strncmp(read,"PING",4)){
 			read[1] = 'O';
-			printf("%s", read);
 			sayraw(read,irc_sock);
+			memset(read, 0, sizeof(read));
 		}	
+	memset(read, 0, sizeof(read));
 	}
 }
 
@@ -111,3 +113,21 @@ addr_list = (struct in_addr **) he->h_addr_list;
 strcpy(ip, inet_ntoa(*addr_list[0]));
 return 0; 
 }
+
+int printt(char read[512]){ //Not very good-terribe. Make better soon. Breaks login srvmsgs. avoid regex
+	if(!(strncmp(read,"PING",4))){ 
+	return 0; }
+	int y = 1; int x=1;
+        while(read[x] != '!') { 
+       		printf("%c", read[x++]); 
+		if(x == strlen(read)){break;} 
+	}	
+	while(read[y] != ':'){ 
+	y++; 
+	}
+        while(y<strlen(read)){ 
+	printf("%c", read[y++]); 
+	}
+return 0; 
+}
+
