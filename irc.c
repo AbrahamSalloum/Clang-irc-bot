@@ -53,8 +53,7 @@ fgets(message, sizeof(message), stdin);
 	}	
 		else if(!(strncmp(message,"QUIT",4))){
 		sayraw(message, irc_sock);
-		close(irc_sock);
-		return 0; //only exit
+		break; 
 		}
 			else if(!(strncmp(message, "PRIVATE", 7))){
 			getchan(message, chan, irc_sock); 
@@ -72,6 +71,8 @@ fgets(message, sizeof(message), stdin);
 							mesg(message,chan,irc_sock);
 							}					
 }
+close(irc_sock);
+return 0;
 }
 void* prntmsg(void *sock){
 char read[512];
