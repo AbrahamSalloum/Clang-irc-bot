@@ -59,12 +59,18 @@ fgets(message, sizeof(message), stdin);
 			else if(!(strncmp(message, "PRIVATE", 7))){
 			getchan(message, chan, irc_sock); 
 			}	
-				else if(!(strncmp(message, "NICK", 4))){
+				else if(!(strncmp(message, "LIST", 4))){
 				sayraw(message, irc_sock);
-				}		
-					else{ 
-					mesg(message,chan,irc_sock);
-					}					
+				}	
+					else if(!(strncmp(message, "WHOIS", 5))){
+					sayraw(message, irc_sock); 
+					}	
+						else if(!(strncmp(message, "NICK", 4))){
+						sayraw(message, irc_sock);
+						}		
+							else{ 
+							mesg(message,chan,irc_sock);
+							}					
 }
 }
 void* prntmsg(void *sock){
