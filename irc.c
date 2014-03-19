@@ -104,11 +104,7 @@ sayraw(privmsg,irc_sock);
 }
 
 void getchan(char join[], char *chan, int irc_sock ){
-char *hash;
-hash=malloc(50*sizeof(char));
-printf("%s\n", join); 
-hash=strtok(join," \n");
-hash=strtok(NULL, " \n");
+char *hash = strchr(join, '#'); 
 strcpy(chan,hash); 
 }
 
