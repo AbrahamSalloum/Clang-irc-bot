@@ -1,3 +1,4 @@
+//quick IRC bot -2014 - ASalloum
 #include <stdio.h> 
 #include <stdlib.h>
 #include <netdb.h>
@@ -9,8 +10,8 @@
 void* prntmsg(void *);
 void sayraw(char*, int);
 void mesg(char*, char* , int);
-int hostip(char hostname[1024], char *ip);
-void getchan(char join[], char *chan, int irc_sock);  
+int hostip(char hostname[1024], char *ip); //Super UGLY!!!
+void getchan(char join[], char *chan, int irc_sock);  //embarrassing 
 int printt( char read[512]); 
 pthread_mutex_t mutex ; 
 int main(int argc, char *argv[]){
@@ -39,7 +40,7 @@ pthread_t tprntmsg;
 ret_tprntmsg = pthread_create(&tprntmsg,NULL,prntmsg,(void*)irc_sock);
 sleep(1); 
 snprintf(authnick, sizeof(authnick), "NICK %s\n\r", getenv("USER")); 
-snprintf(authuser, sizeof(authuser), "USER %s 8 * nota not\n\r", getenv("USER")); 
+snprintf(authuser, sizeof(authuser), "USER %s 8 * Jack U. Lemmon\n\r", getenv("USER")); 
 	sayraw(authnick,irc_sock);
 sleep(1);
 	sayraw(authuser,irc_sock);
@@ -64,7 +65,7 @@ fgets(message, sizeof(message), stdin);
 					else if(!(strncmp(message, "WHOIS", 5))){
 					sayraw(message, irc_sock); 
 					}	
-						else if(!(strncmp(message, "NICK", 4))){
+						else if(!(strncmp(message, "NICK", 5))){
 						sayraw(message, irc_sock);
 						}		
 							else{ 
@@ -81,7 +82,7 @@ int irc_sock = (int)sock;
 	memset(read, 0, sizeof(read)); 
 	recv(irc_sock, read, sizeof(read), 0); //ALL data recv happens here
 	printt(read);
-		if(!strncmp(read,"PING",4)){
+		if(!strncmp(read,"PING",4)){ //repy to PING with PONG -ASAP
 			read[1] = 'O';
 			sayraw(read,irc_sock);
 			memset(read, 0, sizeof(read));
@@ -121,20 +122,18 @@ strcpy(ip, inet_ntoa(*addr_list[0]));
 return 0; 
 }
 
-int printt(char read[512]){ //Not very good-terribe. Make better soon. Breaks login srvmsgs. avoid regex
+int printt(char read[512]){ //Not very good: part/join messages fail
 	if(!(strncmp(read,"PING",4))){ 
 	return 0; }
-	int y = 1; int x=1;
-        while(read[x] != '!') { 
-       		printf("%c", read[x++]); 
-		if(x == strlen(read)){break;} 
-	}	
-	while(read[y] != ':'){ 
-	y++; 
-	}
-        while(y<strlen(read)){ 
-	printf("%c", read[y++]); 
-	}
-return 0; 
+if(( strchr(read, '!')==NULL)){
+printf("%s", read);
+return 0;
 }
-
+int n = strcspn(read,"!");int x;
+for( x = 1; x<n; x++){
+printf("%c", read[x]);
+}
+char *msg = strchr(read+1, ':'); //user message.  
+printf("%s",msg);
+return 0;
+} 
