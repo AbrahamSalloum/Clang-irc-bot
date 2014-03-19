@@ -105,7 +105,7 @@ sayraw(privmsg,irc_sock);
 
 void getchan(char join[], char *chan, int irc_sock ){
 char *hash = strchr(join, '#'); 
-strcpy(chan,hash); 
+snprintf(chan,strlen(hash),hash);
 }
 
 int hostip(char hostname[1024], char *ip){ //crap error checking!!
