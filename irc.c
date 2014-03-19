@@ -117,9 +117,11 @@ return 0;
 }
 
 int printt(char read[512]){ //Not very good: part/join messages fail
-char * msg = (char*) malloc (512);
-	if(!(strncmp(read,"PING",4))){ 
-	return 0; }
+char *msg = strchr(read+1, ':');	
+
+if(!(strncmp(read,"PING",4))){ 
+	return 0;
+ }
 if(( strchr(read, '!')==NULL)){
 printf("%s", read);
 return 0;
