@@ -13,7 +13,6 @@ void mesg(char*, char* , int);
 int hostip(char hostname[1024], char *ip); //Super UGLY!!!
 void getchan(char join[], char *chan, int irc_sock);  //embarrassing 
 int printt( char read[512]); 
-pthread_mutex_t mutex ; 
 int main(int argc, char *argv[]){
 if (argc != 3) {
         printf("Specify host and port: ./a.out <hostname> <port>\n"); 
@@ -85,7 +84,6 @@ int irc_sock = (int)sock;
 		if(!strncmp(read,"PING",4)){ //repy to PING with PONG -ASAP
 			read[1] = 'O';
 			sayraw(read,irc_sock);
-			memset(read, 0, sizeof(read));
 		}	
 	memset(read, 0, sizeof(read));
 	}
@@ -119,6 +117,7 @@ return 0;
 }
 
 int printt(char read[512]){ //Not very good: part/join messages fail
+char * msg = (char*) malloc (512);
 	if(!(strncmp(read,"PING",4))){ 
 	return 0; }
 if(( strchr(read, '!')==NULL)){
@@ -129,7 +128,6 @@ int n = strcspn(read,"!");int x;
 for( x = 1; x<n; x++){
 printf("%c", read[x]);
 }
-char *msg = strchr(read+1, ':'); //user message.  
 printf("%s",msg);
 return 0;
 } 
