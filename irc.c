@@ -117,19 +117,18 @@ return 0;
 }
 
 int printt(char read[512]){ //Not very good: part/join messages fail
+	if(!(strncmp(read,"PING",4))){ return 0; }
 
-if(!(strncmp(read,"PING",4))){ 
-	return 0;
- }
 if(!(strchr(read,'!'))){
 printf("%s", read);
 return 0;
 }
-int n = strcspn(read, "!"); 
-int x;
+
+int n = strcspn(read, "!"); int x;
 for(x = 1; x<n; x++){
 printf("%c", read[x]);
 }
+
 char *msg = strchr(read+1, ':');	
 printf("%s",msg);
 return 0;
