@@ -37,11 +37,9 @@ server.sin_port = htons(atoi(argv[2]));
 
 pthread_t tprntmsg;
 ret_tprntmsg = pthread_create(&tprntmsg,NULL,prntmsg,(void*)irc_sock);
-sleep(1); 
 snprintf(authnick, sizeof(authnick), "NICK %s\n\r", getenv("USER")); 
 snprintf(authuser, sizeof(authuser), "USER %s 8 * Jack U. Lemmon\n\r", getenv("USER")); 
 	sayraw(authnick,irc_sock);
-sleep(1);
 	sayraw(authuser,irc_sock);
 
 while(1){ 
