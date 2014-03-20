@@ -85,7 +85,6 @@ int irc_sock = (int)sock;
 			read[1] = 'O';
 			sayraw(read,irc_sock);
 		}	
-	memset(read, 0, sizeof(read));
 	}
 }
 
