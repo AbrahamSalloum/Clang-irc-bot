@@ -121,12 +121,12 @@ printf("%s", read);
 return 0;
 }
 
-printf("%s","\x1B[36m");
+printf("\x1B[36m"); //cyan
 int n = strcspn(read, "!"); int x;
 for(x = 1; x<n; x++){
 printf("%c", read[x]);
 }
-printf("%s","\x1B[0m");
+printf("\x1B[0m"); //normal
 char *msg = strchr(read+1, ':');	
 printf("%s",msg);
 return 0;
