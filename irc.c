@@ -99,7 +99,8 @@ sayraw(privmsg,irc_sock);
 }
 
 void getchan(char join[], char *chan, int irc_sock ){
-char *hash = strchr(join, '#'); 
+char *hash = (char *)malloc(50);
+hash = strchr(join, '#'); 
 snprintf(chan,strlen(hash),hash);
 }
 
@@ -116,7 +117,7 @@ return 0;
 int printt(char read[512]){ //Not very good: part/join messages fail
 	if(!(strncmp(read,"PING",4))){ return 0; }
 
-if(!(strchr(read,'!'))){
+if((strchr(read,'!'))==NULL){
 printf("%s", read);
 return 0;
 }
@@ -127,7 +128,8 @@ for(x = 1; x<n; x++){
 printf("%c", read[x]);
 }
 printf("\x1B[0m"); //normal
-char *msg = strchr(read+1, ':');	
+char *msg = (char *)malloc(512);
+msg = strchr(read+1, ':');	
 printf("%s",msg);
 return 0;
 } 
