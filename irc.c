@@ -11,7 +11,7 @@ void* prntmsg(void *);
 void sayraw(char*, int);
 void mesg(char*, char* , int);
 int hostip(char hostname[1024], char *ip); //Super UGLY!!!
-void getchan(char join[], char *chan, int irc_sock);  //embarrassing 
+void getchan(char join[], char *chan, int irc_sock); 
 int printt( char read[512]); 
 int main(int argc, char *argv[]){
 if (argc != 3) {
