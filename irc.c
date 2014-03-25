@@ -101,7 +101,7 @@ sayraw(privmsg,irc_sock);
 void getchan(char join[], char *chan, int irc_sock ){
 char *hash = (char *)malloc(50);
 hash = strchr(join, '#'); 
-snprintf(chan,strlen(hash),hash);
+strncpy(chan, hash, strlen(hash)); 
 }
 
 int hostip(char hostname[1024], char *ip){ //crap error checking!!
@@ -121,7 +121,6 @@ if((strchr(read,'!'))==NULL){
 printf("%s", read);
 return 0;
 }
-
 printf("\x1B[36m"); //cyan
 int n = strcspn(read, "!"); int x;
 for(x = 1; x<n; x++){
