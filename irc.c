@@ -12,14 +12,16 @@ void sayraw(char*, int);
 void mesg(char*, char* , int);
 int hostip(char hostname[1024], char *ip); //Super UGLY!!!
 void getchan(char join[], char *chan, int irc_sock); 
-int printt( char read[512]); 
+int printt(char read[512]); 
+char last[512]; 
+void* chkmsg(void *sock);
 int main(int argc, char *argv[]){
 if (argc != 3) {
         printf("Specify host and port: ./a.out <hostname> <port>\n"); 
         return 1;
     }
 char chan[50]; char ip[100]; char message[512]; char authnick[15]; 
-char authuser[35]; int irc_sock; int ret_tprntmsg;
+char authuser[35]; int irc_sock; int ret_tprntmsg; int ret_tchkmsg; 
 struct sockaddr_in server;
 
 	if((irc_sock = socket(AF_INET,SOCK_STREAM,0)) <0){
@@ -34,9 +36,9 @@ server.sin_port = htons(atoi(argv[2]));
 	if(connect(irc_sock, (struct sockaddr *)&server, sizeof(server))){
 	printf("connect error\n");
 	}
-
-pthread_t tprntmsg;
+pthread_t tprntmsg; pthread_t tchkmsg;
 ret_tprntmsg = pthread_create(&tprntmsg,NULL,prntmsg,(void*)irc_sock);
+ret_tchkmsg  = pthread_create(&tchkmsg,NULL,chkmsg,(void*)irc_sock); 
 snprintf(authnick, sizeof(authnick), "NICK %s\n\r", getenv("USER")); 
 snprintf(authuser, sizeof(authuser), "USER %s 8 * Jack U. Lemmon\n\r", getenv("USER")); 
 	sayraw(authnick,irc_sock);
@@ -82,7 +84,10 @@ int irc_sock = (int)sock;
 		if(!strncmp(read,"PING",4)){ //repy to PING with PONG -ASAP
 			read[1] = 'O';
 			sayraw(read,irc_sock);
-		}	
+		}
+		if(!strncmp(last+1,"hi",2)){
+			mesg("sup","#sall",irc_sock); 
+		}	memset(last,'\0',512); 
 	}
 }
 
@@ -93,7 +98,7 @@ void sayraw(char write[512], int irc_sock){
 }
 
 void mesg(char write[512], char *chan, int irc_sock){ //public chan msg formatting
-char privmsg[512] ; 
+char privmsg[512]; 
 snprintf(privmsg, sizeof(privmsg), "PRIVMSG %s%s%s%s", chan, " :", write,"\r\n");
 sayraw(privmsg,irc_sock); 
 }
@@ -101,7 +106,7 @@ sayraw(privmsg,irc_sock);
 void getchan(char join[], char *chan, int irc_sock ){
 char *hash = (char *)malloc(50);
 hash = strchr(join, '#'); 
-strncpy(chan, hash, strlen(hash)); 
+snprintf(chan,strlen(hash),hash); 
 }
 
 int hostip(char hostname[1024], char *ip){ //crap error checking!!
@@ -128,7 +133,19 @@ printf("%c", read[x]);
 }
 printf("\x1B[0m"); //normal
 char *msg = (char *)malloc(512);
-msg = strchr(read+1, ':');	
-printf("%s",msg);
+msg = strchr(read+1, ':');
+strncpy(last, msg, sizeof(last)); 	
+printf("%s",last);
 return 0;
-} 
+}
+
+void* chkmsg(void  *sock){
+int irc_sock = (int)sock;
+	while(1){
+		if(!strncmp(last+1,"hi",2)){
+		mesg("sup","#sall",irc_sock);
+		}
+// functions to run here
+memset(last,'\0',512);
+	}
+}
