@@ -85,9 +85,6 @@ int irc_sock = (int)sock;
 			read[1] = 'O';
 			sayraw(read,irc_sock);
 		}
-		if(!strncmp(last+1,"hi",2)){
-			mesg("sup","#sall",irc_sock); 
-		}	memset(last,'\0',512); 
 	}
 }
 
