@@ -37,8 +37,8 @@ server.sin_port = htons(atoi(argv[2]));
 	printf("connect error\n");
 	}
 pthread_t tprntmsg; pthread_t tchkmsg;
-ret_tprntmsg = pthread_create(&tprntmsg,NULL,prntmsg,(void*)irc_sock);
-ret_tchkmsg  = pthread_create(&tchkmsg,NULL,chkmsg,(void*)irc_sock); 
+ret_tprntmsg = pthread_create(&tprntmsg,NULL,prntmsg,(void*)(intptr_t)irc_sock);
+ret_tchkmsg  = pthread_create(&tchkmsg,NULL,chkmsg,(void*)(intptr_t)irc_sock); 
 snprintf(authnick, sizeof(authnick), "NICK %s\n\r", getenv("USER")); 
 snprintf(authuser, sizeof(authuser), "USER %s 8 * Jack U. Lemmon\n\r", getenv("USER")); 
 	sayraw(authnick,irc_sock);
@@ -76,7 +76,7 @@ return 0;
 }
 void* prntmsg(void *sock){
 char read[512];
-int irc_sock = (int)sock;
+int irc_sock = (intptr_t)sock;
 	while(1){
 	memset(read, 0, sizeof(read)); 
 	recv(irc_sock, read, sizeof(read), 0); //ALL data recv happens here
@@ -100,7 +100,7 @@ snprintf(privmsg, sizeof(privmsg), "PRIVMSG %s%s%s%s", chan, " :", write,"\r\n")
 sayraw(privmsg,irc_sock); 
 }
 
-void getchan(char join[], char *chan, int irc_sock ){
+void getchan(char join[], char *chan, int irc_sock){
 char *hash = (char *)malloc(50);
 hash = strchr(join, '#'); 
 snprintf(chan,strlen(hash),hash); 
@@ -131,18 +131,18 @@ printf("%c", read[x]);
 printf("\x1B[0m"); //normal
 char *msg = (char *)malloc(512);
 msg = strchr(read+1, ':');
-strncpy(last, msg, sizeof(last)); 	
-printf("%s",last);
+printf("%s",msg);
+snprintf(last,512,msg); 	
 return 0;
 }
 
-void* chkmsg(void  *sock){
-int irc_sock = (int)sock;
+void* chkmsg(void* sock){
+int irc_sock = (intptr_t)sock;
 	while(1){
 		if(!strncmp(last+1,"hi",2)){
 		mesg("sup","#sall",irc_sock);
+		memset(last,'\0',512);
 		}
 // functions to run here
-memset(last,'\0',512);
 	}
 }
