@@ -7,6 +7,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <unistd.h> 
+#include <time.h> 
 void* prntmsg(void *);
 void sayraw(char*, int);
 void mesg(char*, char* , int);
@@ -20,70 +21,65 @@ typedef struct ircdata {
         int irc_sock;
         char chan[50];
 	char ip[100];
+	char network[1024];
+	int port;
 
 }ircdata;
-ircdata irc;
+ircdata irc[3];
 
 int main(int argc, char *argv[]){
-if (argc != 3) {
-        printf("Specify host and port: ./a.out <hostname> <port>\n"); 
-        return 1;
-    }
 
-char message[512]; char authnick[15]; 
-char authuser[35]; int ret_tprntmsg; int ret_tchkmsg; 
+strcpy(irc[0].chan,"#sall");
+strcpy(irc[0].network,"irc.undernet.org");
+irc[0].port=6667;
+
+strcpy(irc[1].chan,"#jack");
+strcpy(irc[1].network,"irc.foonetic.net");
+irc[1].port=6667;
+
+char message[512]; char authnick[100]; 
+char authuser[100]; int ret_tprntmsg[3]; int ret_tchkmsg[3]; 
 struct sockaddr_in server;
+pthread_t tprntmsg[3]; pthread_t tchkmsg[3];
 
-	if((irc.irc_sock = socket(AF_INET,SOCK_STREAM,0)) <0){
+int n; 
+
+for(n=0;n<2;n++){
+
+
+	if((irc[n].irc_sock = socket(AF_INET,SOCK_STREAM,0)) <0){
 	printf("Could not create socket\n");
 	}
 
-if ((hostip(argv[1],irc.ip)) == 1) { return 0; };  
-server.sin_addr.s_addr = inet_addr(irc.ip);
+if ((hostip(irc[n].network,irc[n].ip)) == 1) { return 0; };  
+server.sin_addr.s_addr = inet_addr(irc[n].ip);
 server.sin_family = AF_INET;
-server.sin_port = htons(atoi(argv[2]));
+server.sin_port = htons(irc[n].port);
 
-	if(connect(irc.irc_sock, (struct sockaddr *)&server, sizeof(server))){
+	if(connect(irc[n].irc_sock, (struct sockaddr *)&server, sizeof(server))){
 	printf("connect error\n");
 	}
-pthread_t tprntmsg; pthread_t tchkmsg;
-ret_tprntmsg = pthread_create(&tprntmsg,NULL,prntmsg,(void*)irc.irc_sock);
-ret_tchkmsg  = pthread_create(&tchkmsg,NULL,chkmsg,(void*)&irc); 
-snprintf(authnick, sizeof(authnick), "NICK %s\n\r", getenv("USER")); 
-snprintf(authuser, sizeof(authuser), "USER %s 8 * Jack U. Lemmon\n\r", getenv("USER")); 
-	sayraw(authnick,irc.irc_sock);
-	sayraw(authuser,irc.irc_sock);
+ret_tprntmsg[n] = pthread_create(&tprntmsg[n],NULL,prntmsg,(void*)irc[n].irc_sock);
+ret_tchkmsg[n]  = pthread_create(&tchkmsg[n],NULL,chkmsg,(void*)&irc[n]);
+time_t timer = time(0);  
+snprintf(authnick, sizeof(authnick), "NICK %s%ld\n\r", getenv("USER"),timer); 
+snprintf(authuser, sizeof(authuser), "USER %s%ld 8 * Jack U. Lemmon\n\r", getenv("USER"),timer); 
+	sayraw(authnick,irc[n].irc_sock);
+	sayraw(authuser,irc[n].irc_sock);
+	char chanjoin[155]; 
+	snprintf(chanjoin, sizeof(chanjoin), "JOIN %s\r\n", irc[n].chan); 
+	sleep(20); 
+	sayraw(chanjoin, irc[n].irc_sock);
 
-while(1){ 
-fgets(message, sizeof(message), stdin);
-
-	if(!(strncmp(message,"JOIN",4))){
-	sayraw(message, irc.irc_sock);
-	getchan(message, irc.chan, irc.irc_sock);
-	}	
-		else if(!(strncmp(message,"QUIT",4))){
-		sayraw(message, irc.irc_sock);
-		break; 
-		}
-			else if(!(strncmp(message, "PRIVATE", 7))){
-			getchan(message, irc.chan, irc.irc_sock); 
-			}	
-				else if(!(strncmp(message, "LIST", 4))){
-				sayraw(message, irc.irc_sock);
-				}	
-					else if(!(strncmp(message, "WHOIS", 5))){
-					sayraw(message, irc.irc_sock); 
-					}	
-						else if(!(strncmp(message, "NICK", 5))){
-						sayraw(message, irc.irc_sock);
-						}		
-							else{ 
-							mesg(message,irc.chan,irc.irc_sock);
-							}					
 }
-close(irc.irc_sock);
+
+while(1){ }
+
+close(irc[0].irc_sock);
 return 0;
 }
+
+
 void* prntmsg(void *sock){
 char read[512];
 int irc_sock = (int)sock;
@@ -130,28 +126,29 @@ int printt(char read[512]){ //Not very good: part/join messages fail
 	if(!(strncmp(read,"PING",4))){ return 0; }
 
 if((strchr(read,'!'))==NULL){
-printf("%s", read);
+//printf("%s", read);
 return 0;
 }
-printf("\x1B[36m"); //cyan
+//printf("\x1B[36m"); //cyan
 int n = strcspn(read, "!"); int x;
 for(x = 1; x<n; x++){
-printf("%c", read[x]);
+//printf("%c", read[x]);
 }
-printf("\x1B[0m"); //normal
+//printf("\x1B[0m"); //normal
 char *msg = (char *)malloc(512);
 msg = strchr(read+1, ':');
-strncpy(last, msg, sizeof(last)); 	
-printf("%s",last);
+//strncpy(last, msg, sizeof(last)); 	
+//printf("%s",read);
 return 0;
 }
 
 void* chkmsg(void  *ircs){
-struct ircdata *irc = (struct ircdata*)(ircs);
-	while(1){
-		if(!strncmp(last+1,"hi",2)){
-		mesg("sup",irc->chan,irc->irc_sock);
-		memset(last,'\0',512);
-		}
-	}
+//struct ircdata *irc = (struct ircdata*)(ircs);
+//	while(1){
+//		if(!strncmp(last+1,"hi",2)){
+//		mesg("sup",irc->chan,irc->irc_sock);
+//		memset(last,'\0',512);
+//		}
+//	}
+return 0;
 }
