@@ -1,15 +1,5 @@
-gcc -lpthread irc.c 
-./a.out irc.foonetic.net 6667 (or any other  well behaving server/port combo)
+gcc -lpthread irc.c
+works with clang too. 
+fill in the structs and run. 
 
-Basic (bad) skeleton for bot, accepts from stdin the following:
-QUIT - quits 
-JOIN #<chan> - join <chan>
-NICK <newnick> - changes nick to <newnick>
-PRIVATE <user> - starts private chat with <user>, to exit: JOIN #chan
-LIST - Prints list of available chans
-WHOIS <nick> - prints info of <nick>
-
-<anything else> - public/private msg to chan/<user>
-
-buffer overflows are everywere
-output is a little raw. 
+Buggy as hell. 
