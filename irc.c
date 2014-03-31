@@ -34,9 +34,9 @@ strcpy(irc[0].chan,"#sall");
 strcpy(irc[0].network,"irc.foonetic.net");
 irc[0].port=6667;
 
-//strcpy(irc[1].chan,"#sall");
-//strcpy(irc[1].network,"irc.foonetic.net");
-//irc[1].port=6667;
+strcpy(irc[1].chan,"#jack");
+strcpy(irc[1].network,"irc.foonetic.net");
+irc[1].port=6667;
 
 char message[512]; char authnick[100]; 
 char authuser[100]; int ret_tprntmsg[3]; int ret_tchkmsg[3]; 
@@ -44,9 +44,7 @@ struct sockaddr_in server;
 pthread_t tprntmsg[3]; pthread_t tchkmsg[3];
 
 int n; 
-
-for(n=0;n<1;n++){
-
+for(n=0;n<2;n++){
 
 	if((irc[n].irc_sock = socket(AF_INET,SOCK_STREAM,0)) <0){
 	printf("Could not create socket\n");
@@ -64,7 +62,7 @@ ret_tprntmsg[n] = pthread_create(&tprntmsg[n],NULL,prntmsg,(void*)&irc[n]);
 ret_tchkmsg[n]  = pthread_create(&tchkmsg[n],NULL,chkmsg,(void*)&irc[n]);
 time_t timer = time(0);  
 snprintf(authnick, sizeof(authnick), "NICK %s%ld\n\r", getenv("USER"),timer); 
-snprintf(authuser, sizeof(authuser), "USER %s%ld 8 * Jack U. Lemmon\n\r", getenv("USER"),timer); 
+snprintf(authuser, sizeof(authuser), "USER %s%ld 8 * Abe S. Salloum\n\r", getenv("USER"),timer); 
 	sayraw(authnick,irc[n].irc_sock);
 	sayraw(authuser,irc[n].irc_sock);
 	char chanjoin[155]; 
@@ -86,8 +84,7 @@ struct ircdata *irc = (struct ircdata*)(ircs);
 	while(1){
 	memset(irc->read,'\0', sizeof(irc->read)); 
 	recv(irc->irc_sock, irc->read, sizeof(irc->read), 0); //ALL data recv happens here
-	//printf("%s\n", irc->read); 
-	printt((void*)&irc);
+	printt((void*)irc);
 		if(!strncmp(irc->read,"PING",4)){ //repy to PING with PONG -ASAP
 			irc->read[1] = 'O';
 			sayraw(irc->read,irc->irc_sock);
@@ -125,15 +122,13 @@ return 0;
 
 int printt(void *ircs){ //Not very good: part/join messages fail
 struct ircdata *irc = (struct ircdata*)(ircs);
-printf("%s\n", irc->read); 
 	if(!(strncmp(irc->read,"PING",4))){ return 0; }
 if((strchr(irc->read,'!'))==NULL){
 return 0;
 }
 char *msg = (char *)malloc(512);
 msg = strchr(irc->read+1, ':');
-strcpy(irc->last, msg); 	
-printf("%s\n", msg); 
+strncpy(irc->last, msg, 511); 	
 return 0;
 }
 
