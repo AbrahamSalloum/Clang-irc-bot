@@ -2,4 +2,5 @@ gcc -lpthread irc.c
 works with clang too. 
 fill in the structs and run. 
 
-Buggy as hell. 
+Buggy as hell.
+Breaks is server *even slightly* deviats from stardards - not gonna fix.  
