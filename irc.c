@@ -13,8 +13,7 @@ void sayraw(char*, int);
 void mesg(char*, char* , int);
 int hostip(char hostname[1024], char *ip); //Super UGLY!!!
 void getchan(char join[], char *chan, int irc_sock); 
-int printt(char read[512]); 
-char last[512]; 
+int printt(void *ircs); 
 void* chkmsg(void *sock);
 
 typedef struct ircdata {
@@ -23,6 +22,8 @@ typedef struct ircdata {
 	char ip[100];
 	char network[1024];
 	int port;
+	char last[512];
+	char read[512];  
 
 }ircdata;
 ircdata irc[3];
@@ -30,12 +31,12 @@ ircdata irc[3];
 int main(int argc, char *argv[]){
 
 strcpy(irc[0].chan,"#sall");
-strcpy(irc[0].network,"irc.undernet.org");
+strcpy(irc[0].network,"irc.foonetic.net");
 irc[0].port=6667;
 
-strcpy(irc[1].chan,"#jack");
-strcpy(irc[1].network,"irc.foonetic.net");
-irc[1].port=6667;
+//strcpy(irc[1].chan,"#sall");
+//strcpy(irc[1].network,"irc.foonetic.net");
+//irc[1].port=6667;
 
 char message[512]; char authnick[100]; 
 char authuser[100]; int ret_tprntmsg[3]; int ret_tchkmsg[3]; 
@@ -44,7 +45,7 @@ pthread_t tprntmsg[3]; pthread_t tchkmsg[3];
 
 int n; 
 
-for(n=0;n<2;n++){
+for(n=0;n<1;n++){
 
 
 	if((irc[n].irc_sock = socket(AF_INET,SOCK_STREAM,0)) <0){
@@ -59,7 +60,7 @@ server.sin_port = htons(irc[n].port);
 	if(connect(irc[n].irc_sock, (struct sockaddr *)&server, sizeof(server))){
 	printf("connect error\n");
 	}
-ret_tprntmsg[n] = pthread_create(&tprntmsg[n],NULL,prntmsg,(void*)irc[n].irc_sock);
+ret_tprntmsg[n] = pthread_create(&tprntmsg[n],NULL,prntmsg,(void*)&irc[n]);
 ret_tchkmsg[n]  = pthread_create(&tchkmsg[n],NULL,chkmsg,(void*)&irc[n]);
 time_t timer = time(0);  
 snprintf(authnick, sizeof(authnick), "NICK %s%ld\n\r", getenv("USER"),timer); 
@@ -68,7 +69,7 @@ snprintf(authuser, sizeof(authuser), "USER %s%ld 8 * Jack U. Lemmon\n\r", getenv
 	sayraw(authuser,irc[n].irc_sock);
 	char chanjoin[155]; 
 	snprintf(chanjoin, sizeof(chanjoin), "JOIN %s\r\n", irc[n].chan); 
-	sleep(20); 
+	sleep(10); 
 	sayraw(chanjoin, irc[n].irc_sock);
 
 }
@@ -80,16 +81,16 @@ return 0;
 }
 
 
-void* prntmsg(void *sock){
-char read[512];
-int irc_sock = (int)sock;
+void* prntmsg(void *ircs){
+struct ircdata *irc = (struct ircdata*)(ircs);
 	while(1){
-	memset(read, 0, sizeof(read)); 
-	recv(irc_sock, read, sizeof(read), 0); //ALL data recv happens here
-	printt(read);
-		if(!strncmp(read,"PING",4)){ //repy to PING with PONG -ASAP
-			read[1] = 'O';
-			sayraw(read,irc_sock);
+	memset(irc->read,'\0', sizeof(irc->read)); 
+	recv(irc->irc_sock, irc->read, sizeof(irc->read), 0); //ALL data recv happens here
+	//printf("%s\n", irc->read); 
+	printt((void*)&irc);
+		if(!strncmp(irc->read,"PING",4)){ //repy to PING with PONG -ASAP
+			irc->read[1] = 'O';
+			sayraw(irc->read,irc->irc_sock);
 		}
 	}
 }
@@ -122,33 +123,27 @@ strcpy(ip, inet_ntoa(*addr_list[0]));
 return 0; 
 }
 
-int printt(char read[512]){ //Not very good: part/join messages fail
-	if(!(strncmp(read,"PING",4))){ return 0; }
-
-if((strchr(read,'!'))==NULL){
-//printf("%s", read);
+int printt(void *ircs){ //Not very good: part/join messages fail
+struct ircdata *irc = (struct ircdata*)(ircs);
+printf("%s\n", irc->read); 
+	if(!(strncmp(irc->read,"PING",4))){ return 0; }
+if((strchr(irc->read,'!'))==NULL){
 return 0;
 }
-//printf("\x1B[36m"); //cyan
-int n = strcspn(read, "!"); int x;
-for(x = 1; x<n; x++){
-//printf("%c", read[x]);
-}
-//printf("\x1B[0m"); //normal
 char *msg = (char *)malloc(512);
-msg = strchr(read+1, ':');
-//strncpy(last, msg, sizeof(last)); 	
-//printf("%s",read);
+msg = strchr(irc->read+1, ':');
+strcpy(irc->last, msg); 	
+printf("%s\n", msg); 
 return 0;
 }
 
 void* chkmsg(void  *ircs){
-//struct ircdata *irc = (struct ircdata*)(ircs);
-//	while(1){
-//		if(!strncmp(last+1,"hi",2)){
-//		mesg("sup",irc->chan,irc->irc_sock);
-//		memset(last,'\0',512);
-//		}
-//	}
+struct ircdata *irc = (struct ircdata*)(ircs);
+	while(1){
+		if(!strncmp(irc->last+1,"hi",2)){
+		mesg("sup",irc->chan,irc->irc_sock);
+		memset(irc->last,'\0',512);
+		}
+	}
 return 0;
 }
