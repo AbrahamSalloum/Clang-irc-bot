@@ -11,7 +11,7 @@
 void* prntmsg(void *);
 void sayraw(char*, int);
 void mesg(char*, char* , int);
-int hostip(char hostname[1024], char *ip); //Super UGLY!!!
+int hostip(void *ircs); //Super UGLY!!!
 void getchan(char join[], char *chan, int irc_sock); 
 int printt(void *ircs); 
 void* chkmsg(void *sock);
@@ -31,15 +31,15 @@ ircdata irc[3];
 int main(int argc, char *argv[]){
 
 strcpy(irc[0].chan,"#sall");
-strcpy(irc[0].network,"irc.foonetic.net");
+strcpy(irc[0].network,"irc.undernet.org");
 irc[0].port=6667;
 
-strcpy(irc[1].chan,"#jack");
+strcpy(irc[1].chan,"#sall");
 strcpy(irc[1].network,"irc.foonetic.net");
 irc[1].port=6667;
 
-char message[512]; char authnick[100]; 
-char authuser[100]; int ret_tprntmsg[3]; int ret_tchkmsg[3]; 
+char authnick[100]; char authuser[100]; 
+int ret_tprntmsg[3]; int ret_tchkmsg[3]; 
 struct sockaddr_in server;
 pthread_t tprntmsg[3]; pthread_t tchkmsg[3];
 
@@ -50,12 +50,12 @@ for(n=0;n<2;n++){
 	printf("Could not create socket\n");
 	}
 
-if ((hostip(irc[n].network,irc[n].ip)) == 1) { return 0; };  
+if((hostip((void *)&irc[n])==1)) { return 0; };
 server.sin_addr.s_addr = inet_addr(irc[n].ip);
 server.sin_family = AF_INET;
 server.sin_port = htons(irc[n].port);
 
-	if(connect(irc[n].irc_sock, (struct sockaddr *)&server, sizeof(server))){
+	if(connect(irc[n].irc_sock,(struct sockaddr *)&server,sizeof(server))){
 	printf("connect error\n");
 	}
 ret_tprntmsg[n] = pthread_create(&tprntmsg[n],NULL,prntmsg,(void*)&irc[n]);
@@ -67,7 +67,7 @@ snprintf(authuser, sizeof(authuser), "USER %s%ld 8 * Abe S. Salloum\n\r", getenv
 	sayraw(authuser,irc[n].irc_sock);
 	char chanjoin[155]; 
 	snprintf(chanjoin, sizeof(chanjoin), "JOIN %s\r\n", irc[n].chan); 
-	sleep(10); 
+	sleep(15); 
 	sayraw(chanjoin, irc[n].irc_sock);
 
 }
@@ -82,8 +82,8 @@ return 0;
 void* prntmsg(void *ircs){
 struct ircdata *irc = (struct ircdata*)(ircs);
 	while(1){
-	memset(irc->read,'\0', sizeof(irc->read)); 
-	recv(irc->irc_sock, irc->read, sizeof(irc->read), 0); //ALL data recv happens here
+	memset(irc->read,'\0',sizeof(irc->read)); 
+	recv(irc->irc_sock,irc->read,sizeof(irc->read), 0); //ALL data recv happens here
 	printt((void*)irc);
 		if(!strncmp(irc->read,"PING",4)){ //repy to PING with PONG -ASAP
 			irc->read[1] = 'O';
@@ -110,13 +110,14 @@ hash = strchr(join, '#');
 snprintf(chan,strlen(hash),hash); 
 }
 
-int hostip(char hostname[1024], char *ip){ //crap error checking!!
+int hostip(void *ircs){ //crap error checking!!
+struct ircdata *irc = (struct ircdata*)(ircs);
 struct hostent *he;     
 struct in_addr **addr_list;   
-he = gethostbyname( hostname );
+he = gethostbyname( irc->network );
 if(he == NULL){ printf("No IP\n"); return 1; } 
 addr_list = (struct in_addr **) he->h_addr_list;
-strcpy(ip, inet_ntoa(*addr_list[0]));
+strcpy(irc->ip,inet_ntoa(*addr_list[0]));
 return 0; 
 }
 
@@ -128,16 +129,16 @@ return 0;
 }
 char *msg = (char *)malloc(512);
 msg = strchr(irc->read+1, ':');
-strncpy(irc->last, msg, 511); 	
+strncpy(irc->last,msg,strlen(msg)); 	
 return 0;
 }
 
-void* chkmsg(void  *ircs){
+void* chkmsg(void *ircs){
 struct ircdata *irc = (struct ircdata*)(ircs);
 	while(1){
 		if(!strncmp(irc->last+1,"hi",2)){
 		mesg("sup",irc->chan,irc->irc_sock);
-		memset(irc->last,'\0',512);
+		memset(irc->last,'\0',sizeof(irc->last));
 		}
 	}
 return 0;
