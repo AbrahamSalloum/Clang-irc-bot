@@ -12,7 +12,7 @@ void* prntmsg(void *);
 void sayraw(char*, int);
 void mesg(char*, char* , int);
 int hostip(void *ircs); //Super UGLY!!!
-int printt(void *ircs); 
+int getlast(void *ircs); 
 void* chkmsg(void *sock);
 
 typedef struct ircdata {
@@ -83,7 +83,7 @@ struct ircdata *irc = (struct ircdata*)(ircs);
 	while(1){
 	memset(irc->read,'\0',sizeof(irc->read)); 
 	recv(irc->irc_sock,irc->read,sizeof(irc->read), 0); //ALL data recv happens here
-	printt((void*)irc);
+	getlast((void*)irc);
 		if(!strncmp(irc->read,"PING",4)){ //repy to PING with PONG -ASAP
 			irc->read[1] = 'O';
 			sayraw(irc->read,irc->irc_sock);
@@ -114,7 +114,7 @@ strcpy(irc->ip,inet_ntoa(*addr_list[0]));
 return 0; 
 }
 
-int printt(void *ircs){ //Not very good: part/join messages fail
+int getlast(void *ircs){ //Not very good: part/join messages fail
 struct ircdata *irc = (struct ircdata*)(ircs);
 	if(!(strncmp(irc->read,"PING",4))){ return 0; }
 if((strchr(irc->read,'!'))==NULL){
