@@ -12,7 +12,6 @@ void* prntmsg(void *);
 void sayraw(char*, int);
 void mesg(char*, char* , int);
 int hostip(void *ircs); //Super UGLY!!!
-void getchan(char join[], char *chan, int irc_sock); 
 int printt(void *ircs); 
 void* chkmsg(void *sock);
 
@@ -31,7 +30,7 @@ ircdata irc[3];
 int main(int argc, char *argv[]){
 
 strcpy(irc[0].chan,"#sall");
-strcpy(irc[0].network,"irc.undernet.org");
+strcpy(irc[0].network,"irc.efnet.org");
 irc[0].port=6667;
 
 strcpy(irc[1].chan,"#sall");
@@ -102,12 +101,6 @@ void mesg(char write[512], char *chan, int irc_sock){ //public chan msg formatti
 char privmsg[512]; 
 snprintf(privmsg, sizeof(privmsg), "PRIVMSG %s%s%s%s", chan, " :", write,"\r\n");
 sayraw(privmsg,irc_sock); 
-}
-
-void getchan(char join[], char *chan, int irc_sock ){
-char *hash = (char *)malloc(50);
-hash = strchr(join, '#'); 
-snprintf(chan,strlen(hash),hash); 
 }
 
 int hostip(void *ircs){ //crap error checking!!
