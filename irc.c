@@ -30,7 +30,7 @@ ircdata irc[3];
 int main(int argc, char *argv[]){
 
 strcpy(irc[0].chan,"#sall");
-strcpy(irc[0].network,"irc.undernet.org");
+strcpy(irc[0].network,"irc.efnet.org");
 irc[0].port=6667;
 
 strcpy(irc[1].chan,"#sall");
