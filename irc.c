@@ -30,7 +30,7 @@ ircdata irc[3];
 int main(int argc, char *argv[]){
 
 strcpy(irc[0].chan,"#sall");
-strcpy(irc[0].network,"irc.efnet.org");
+strcpy(irc[0].network,"irc.undernet.org");
 irc[0].port=6667;
 
 strcpy(irc[1].chan,"#sall");
@@ -62,7 +62,9 @@ ret_tchkmsg[n]  = pthread_create(&tchkmsg[n],NULL,chkmsg,(void*)&irc[n]);
 time_t timer = time(0);  
 snprintf(authnick, sizeof(authnick), "NICK %s%ld\n\r", getenv("USER"),timer); 
 snprintf(authuser, sizeof(authuser), "USER %s%ld 8 * Abe S. Salloum\n\r", getenv("USER"),timer); 
+	sleep(3);
 	sayraw(authnick,irc[n].irc_sock);
+	sleep(3); 
 	sayraw(authuser,irc[n].irc_sock);
 	char chanjoin[155]; 
 	snprintf(chanjoin, sizeof(chanjoin), "JOIN %s\r\n", irc[n].chan); 
