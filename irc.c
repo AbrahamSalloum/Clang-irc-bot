@@ -37,13 +37,17 @@ strcpy(irc[1].chan,"#sall");
 strcpy(irc[1].network,"irc.foonetic.net");
 irc[1].port=6667;
 
+strcpy(irc[2].chan,"#sall");
+strcpy(irc[2].network,"irc.undernet.org");
+irc[2].port=6667;
+
 char authnick[100]; char authuser[100]; 
 int ret_tprntmsg[3]; int ret_tchkmsg[3]; 
 struct sockaddr_in server;
 pthread_t tprntmsg[3]; pthread_t tchkmsg[3];
 
 int n; 
-for(n=0;n<2;n++){
+for(n=0;n<3;n++){
 
 	if((irc[n].irc_sock = socket(AF_INET,SOCK_STREAM,0)) <0){
 	printf("Could not create socket\n");
@@ -68,7 +72,7 @@ snprintf(authuser, sizeof(authuser), "USER %s%ld 8 * Abe S. Salloum\n\r", getenv
 	sayraw(authuser,irc[n].irc_sock);
 	char chanjoin[155]; 
 	snprintf(chanjoin, sizeof(chanjoin), "JOIN %s\r\n", irc[n].chan); 
-	sleep(15); 
+	sleep(10); 
 	sayraw(chanjoin, irc[n].irc_sock);
 
 }
@@ -83,7 +87,7 @@ return 0;
 void* prntmsg(void *ircs){
 struct ircdata *irc = (struct ircdata*)(ircs);
 	while(1){
-	memset(irc->read,'\0',sizeof(irc->read)); 
+//	memset(irc->read,'\0',sizeof(irc->read)); 
 	recv(irc->irc_sock,irc->read,sizeof(irc->read), 0); //ALL data recv happens here
 	getlast((void*)irc);
 		if(!strncmp(irc->read,"PING",4)){ //repy to PING with PONG -ASAP
@@ -133,7 +137,7 @@ struct ircdata *irc = (struct ircdata*)(ircs);
 	while(1){
 		if(!strncmp(irc->last+1,"hi",2)){
 		mesg("sup",irc->chan,irc->irc_sock);
-		memset(irc->last,'\0',sizeof(irc->last));
+		//memset(irc->last,'\0',sizeof(irc->last));
 		}
 	}
 return 0;
