@@ -2,12 +2,15 @@
 #include <stdio.h> 
 #include <stdlib.h>
 #include <netdb.h>
+#include <fcntl.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <string.h>
 #include <pthread.h>
 #include <unistd.h> 
 #include <time.h> 
+#include <sys/stat.h>
+#include <sys/types.h>
 void* prntmsg(void *);
 void sayraw(char*, int);
 void mesg(char*, char* , int);
@@ -22,7 +25,8 @@ typedef struct ircdata {
 	char network[1024];
 	int port;
 	char last[512];
-	char read[512];  
+	char read[512]; 
+	int log; 
 
 }ircdata;
 ircdata irc[3];
@@ -37,21 +41,21 @@ strcpy(irc[1].chan,"#sall");
 strcpy(irc[1].network,"irc.foonetic.net");
 irc[1].port=6667;
 
-strcpy(irc[2].chan,"#sall");
-strcpy(irc[2].network,"irc.undernet.org");
-irc[2].port=6667;
-
 char authnick[100]; char authuser[100]; 
 int ret_tprntmsg[3]; int ret_tchkmsg[3]; 
 struct sockaddr_in server;
 pthread_t tprntmsg[3]; pthread_t tchkmsg[3];
 
 int n; 
-for(n=0;n<3;n++){
 
+for(n=0;n<2;n++){
 	if((irc[n].irc_sock = socket(AF_INET,SOCK_STREAM,0)) <0){
-	printf("Could not create socket\n");
+	printf("Could niot create socket\n");
 	}
+char filepath[100];
+
+snprintf(filepath, 100, "%s.%s.%d",irc[n].network,irc[n].chan,n); 
+irc[n].log=open(filepath,O_CREAT|O_WRONLY|O_APPEND,0666); 
 
 if((hostip((void *)&irc[n])==1)) { return 0; };
 server.sin_addr.s_addr = inet_addr(irc[n].ip);
@@ -72,7 +76,7 @@ snprintf(authuser, sizeof(authuser), "USER %s%ld 8 * Abe S. Salloum\n\r", getenv
 	sayraw(authuser,irc[n].irc_sock);
 	char chanjoin[155]; 
 	snprintf(chanjoin, sizeof(chanjoin), "JOIN %s\r\n", irc[n].chan); 
-	sleep(10); 
+	sleep(15); 
 	sayraw(chanjoin, irc[n].irc_sock);
 
 }
@@ -87,9 +91,10 @@ return 0;
 void* prntmsg(void *ircs){
 struct ircdata *irc = (struct ircdata*)(ircs);
 	while(1){
-//	memset(irc->read,'\0',sizeof(irc->read)); 
+	memset(irc->read,'\0',sizeof(irc->read)); 
 	recv(irc->irc_sock,irc->read,sizeof(irc->read), 0); //ALL data recv happens here
-	getlast((void*)irc);
+	write(irc->log, irc->last, strlen(irc->last));	
+getlast((void*)irc);
 		if(!strncmp(irc->read,"PING",4)){ //repy to PING with PONG -ASAP
 			irc->read[1] = 'O';
 			sayraw(irc->read,irc->irc_sock);
@@ -137,7 +142,7 @@ struct ircdata *irc = (struct ircdata*)(ircs);
 	while(1){
 		if(!strncmp(irc->last+1,"hi",2)){
 		mesg("sup",irc->chan,irc->irc_sock);
-		//memset(irc->last,'\0',sizeof(irc->last));
+		memset(irc->last,'\0',sizeof(irc->last));
 		}
 	}
 return 0;
