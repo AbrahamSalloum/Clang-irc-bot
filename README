@@ -1,6 +1,8 @@
 gcc -lpthread irc.c
 works with clang too. 
 fill in the structs and run. 
+Logs all activty (files in running dir). 
+
 
 Buggy as hell.
 Breaks if server *even slightly* deviats from stardards - not gonna fix.  
