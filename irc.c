@@ -54,7 +54,7 @@ for(n=0;n<2;n++){
 	}
 char filepath[100];
 
-snprintf(filepath, 100, "%s.%s.%dn",irc[n].network,irc[n].chan,n); 
+snprintf(filepath, 100, "log%s.%s.%ld",irc[n].network,irc[n].chan,time(0)); 
 irc[n].log=open(filepath,O_CREAT|O_WRONLY|O_APPEND,0666); 
 
 if((hostip((void *)&irc[n])==1)) { return 0; };
@@ -93,7 +93,7 @@ struct ircdata *irc = (struct ircdata*)(ircs);
 	while(1){
 	memset(irc->read,'\0',sizeof(irc->read)); 
 	recv(irc->irc_sock,irc->read,sizeof(irc->read), 0); //ALL data recv happens here
-	write(irc->log, irc->read, strlen(irc->last));	
+	write(irc->log, irc->read, strlen(irc->read));	
 getlast((void*)irc);
 		if(!strncmp(irc->read,"PING",4)){ //repy to PING with PONG -ASAP
 			irc->read[1] = 'O';
