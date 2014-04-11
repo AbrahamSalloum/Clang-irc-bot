@@ -81,9 +81,10 @@ snprintf(authuser, sizeof(authuser), "USER %s%ld 8 * Abe S. Salloum\n\r", getenv
 
 }
 
-while(1){ }
+pthread_join(tprntmsg[n],NULL); //waits for threads to end (they never do)
+pthread_join(tchkmsg[n],NULL); 
 
-close(irc[0].irc_sock);
+close(irc[n].irc_sock);
 return 0;
 }
 
@@ -91,7 +92,6 @@ return 0;
 void* prntmsg(void *ircs){
 struct ircdata *irc = (struct ircdata*)(ircs);
 	while(1){
-	memset(irc->read,'\0',sizeof(irc->read)); 
 	recv(irc->irc_sock,irc->read,sizeof(irc->read), 0); //ALL data recv happens here
 	write(irc->log, irc->read, strlen(irc->read));	
 getlast((void*)irc);
@@ -135,6 +135,7 @@ char *msg = (char *)malloc(512);
 msg = strchr(irc->read+1, ':');
 strncpy(irc->last,msg,strlen(msg)); 	
 return 0;
+free(msg);
 }
 
 void* chkmsg(void *ircs){
