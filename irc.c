@@ -134,8 +134,8 @@ return 0;
 char *msg = (char *)malloc(512);
 msg = strchr(irc->read+1, ':');
 strncpy(irc->last,msg,strlen(msg)); 	
-return 0;
 free(msg);
+return 0;
 }
 
 void* chkmsg(void *ircs){
