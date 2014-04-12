@@ -140,5 +140,4 @@ struct ircdata *irc = (struct ircdata*)(ircs);
 		mesg("sup",irc->chan,irc->irc_sock);
 		irc->last[1]='\0';
 		}
-return 0;
 }
