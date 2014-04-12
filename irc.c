@@ -138,7 +138,7 @@ void* chkmsg(void *ircs){
 struct ircdata *irc = (struct ircdata*)(ircs);
 		if(!strncmp(irc->last+1,"hi",2)){
 		mesg("sup",irc->chan,irc->irc_sock);
-		*irc->last='\0';
+		irc->last[0]='\0';
 		}
 return 0;
 }
