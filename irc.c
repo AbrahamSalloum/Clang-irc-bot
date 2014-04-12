@@ -95,7 +95,8 @@ chkmsg((void*)irc);
 			irc->read[1] = 'O';
 			sayraw(irc->read,irc->irc_sock);
 		}
- }
+	memset(irc->read,'\0', 512);  
+}
 	
 }
 
@@ -138,7 +139,7 @@ void* chkmsg(void *ircs){
 struct ircdata *irc = (struct ircdata*)(ircs);
 		if(!strncmp(irc->last+1,"hi",2)){
 		mesg("sup",irc->chan,irc->irc_sock);
-		irc->last[0]='\0';
+		irc->last[1]='\0';
 		}
 return 0;
 }
