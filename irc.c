@@ -32,7 +32,7 @@ typedef struct ircdata {
 ircdata irc[3];
 
 int main(int argc, char *argv[]){
-
+daemon(1,1); 
 strcpy(irc[0].chan,"#sall");
 strcpy(irc[0].network,"irc.efnet.org");
 irc[0].port=6667;
@@ -66,7 +66,6 @@ server.sin_port = htons(irc[n].port);
 	printf("connect error\n");
 	}
 ret_tprntmsg[n] = pthread_create(&tprntmsg[n],NULL,prntmsg,(void*)&irc[n]);
-ret_tchkmsg[n]  = pthread_create(&tchkmsg[n],NULL,chkmsg,(void*)&irc[n]);
 time_t timer = time(0);  
 snprintf(authnick, sizeof(authnick), "NICK %s%ld\n\r", getenv("USER"),timer); 
 snprintf(authuser, sizeof(authuser), "USER %s%ld 8 * Abe S. Salloum\n\r", getenv("USER"),timer); 
@@ -76,30 +75,35 @@ snprintf(authuser, sizeof(authuser), "USER %s%ld 8 * Abe S. Salloum\n\r", getenv
 	sayraw(authuser,irc[n].irc_sock);
 	char chanjoin[155]; 
 	snprintf(chanjoin, sizeof(chanjoin), "JOIN %s\r\n", irc[n].chan); 
-	sleep(15); 
+	sleep(8); 
 	sayraw(chanjoin, irc[n].irc_sock);
 
 }
-
-pthread_join(tprntmsg[n],NULL); //waits for threads to end (they never do)
-pthread_join(tchkmsg[n],NULL); 
-
-close(irc[n].irc_sock);
+pthread_exit(0);
 return 0;
 }
 
 
 void* prntmsg(void *ircs){
 struct ircdata *irc = (struct ircdata*)(ircs);
-	while(1){
-	recv(irc->irc_sock,irc->read,sizeof(irc->read), 0); //ALL data recv happens here
-	write(irc->log, irc->read, strlen(irc->read));	
+fd_set check;
+FD_ZERO(&check); 
+FD_SET(irc->irc_sock,&check);
+int n = irc->irc_sock+1;
+ while(1){
+	select(n,&check, NULL,NULL,NULL);
+	if(FD_ISSET(irc->irc_sock,&check)){
+	recv(irc->irc_sock,irc->read,sizeof(irc->read),0); //ALL data recv happens here
+	write(irc->log, irc->read, strlen(irc->read));
 getlast((void*)irc);
+chkmsg((void*)irc); 
 		if(!strncmp(irc->read,"PING",4)){ //repy to PING with PONG -ASAP
 			irc->read[1] = 'O';
 			sayraw(irc->read,irc->irc_sock);
 		}
-	}
+	} 
+ }
+	
 }
 
 void sayraw(char write[512], int irc_sock){
@@ -134,17 +138,14 @@ return 0;
 char *msg = (char *)malloc(512);
 msg = strchr(irc->read+1, ':');
 strncpy(irc->last,msg,strlen(msg)); 	
-free(msg);
 return 0;
 }
 
 void* chkmsg(void *ircs){
 struct ircdata *irc = (struct ircdata*)(ircs);
-	while(1){
 		if(!strncmp(irc->last+1,"hi",2)){
 		mesg("sup",irc->chan,irc->irc_sock);
-		memset(irc->last,'\0',sizeof(irc->last));
+		*irc->last='\0';
 		}
-	}
 return 0;
 }
