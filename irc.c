@@ -42,9 +42,9 @@ strcpy(irc[1].network,"irc.foonetic.net");
 irc[1].port=6667;
 
 char authnick[100]; char authuser[100]; 
-int ret_tprntmsg[3]; int ret_tchkmsg[3]; 
+int ret_tprntmsg[3];
 struct sockaddr_in server;
-pthread_t tprntmsg[3]; pthread_t tchkmsg[3];
+pthread_t tprntmsg[3];
 
 int n; 
 
