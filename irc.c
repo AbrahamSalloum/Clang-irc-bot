@@ -73,9 +73,9 @@ snprintf(authuser, sizeof(authuser), "USER %s%ld 8 * Abe S. Salloum\n\r", getenv
 	sayraw(authnick,irc[n].irc_sock);
 	sleep(3); 
 	sayraw(authuser,irc[n].irc_sock);
-	char chanjoin[155]; 
+	char chanjoin[57]; 
 	snprintf(chanjoin, sizeof(chanjoin), "JOIN %s\r\n", irc[n].chan); 
-	sleep(8); 
+	sleep(5); 
 	sayraw(chanjoin, irc[n].irc_sock);
 
 }
@@ -86,13 +86,7 @@ return 0;
 
 void* prntmsg(void *ircs){
 struct ircdata *irc = (struct ircdata*)(ircs);
-fd_set check;
-FD_ZERO(&check); 
-FD_SET(irc->irc_sock,&check);
-int n = irc->irc_sock+1;
  while(1){
-	select(n,&check, NULL,NULL,NULL);
-	if(FD_ISSET(irc->irc_sock,&check)){
 	recv(irc->irc_sock,irc->read,sizeof(irc->read),0); //ALL data recv happens here
 	write(irc->log, irc->read, strlen(irc->read));
 getlast((void*)irc);
@@ -101,7 +95,6 @@ chkmsg((void*)irc);
 			irc->read[1] = 'O';
 			sayraw(irc->read,irc->irc_sock);
 		}
-	} 
  }
 	
 }
