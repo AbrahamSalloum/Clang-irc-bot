@@ -110,7 +110,7 @@ chkmsg((void*)irc);
 
 void sayraw(char write[512], int irc_sock){
 	if ((send(irc_sock, write, strlen(write),0))<0){ //ALL data sending happens here
-	printf("error writing\n"); 
+	printf("error writing\n"); fflush(stdout);  
 	}
 }
 
