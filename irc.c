@@ -32,6 +32,9 @@ ircdata irc[3];
 
 int main(int argc, char *argv[]){
 daemon(1,1); 
+if(argc==2){
+int see = chdir(argv[1]);
+}
 strcpy(irc[0].chan,"#sall");
 strcpy(irc[0].network,"irc.efnet.org");
 irc[0].port=6667;
@@ -46,12 +49,18 @@ struct sockaddr_in server;
 pthread_t tprntmsg[3];
 
 int n; 
-
+if((mkdir("logs", S_IRWXU | S_IRWXG | S_IRWXO)) <0){
+  if((chdir("logs") <0)){
+	printf("could not write to folder, permissions?\n");
+	fflush(stdout); return 0; 
+  }
+} 
 for(n=0;n<2;n++){
 	if((irc[n].irc_sock = socket(AF_INET,SOCK_STREAM,0)) <0){
-	printf("Could niot create socket\n");
+	printf("Could not create socket\n"); fflush(stdout); return 0;
 	}
 char filepath[100];
+
 
 snprintf(filepath, 100, "log%s.%s.%ld",irc[n].network,irc[n].chan,time(0)); 
 irc[n].log=open(filepath,O_CREAT|O_WRONLY|O_APPEND,0666); 
@@ -62,7 +71,7 @@ server.sin_family = AF_INET;
 server.sin_port = htons(irc[n].port);
 
 	if(connect(irc[n].irc_sock,(struct sockaddr *)&server,sizeof(server))){
-	printf("connect error\n");
+	printf("connect error\n"); fflush(stdout); return 0; 
 	}
 ret_tprntmsg[n] = pthread_create(&tprntmsg[n],NULL,prntmsg,(void*)&irc[n]);
 time_t timer = time(0);  
