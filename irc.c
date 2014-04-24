@@ -25,7 +25,8 @@ typedef struct ircdata {
 	int port;
 	char last[512];
 	char read[512]; 
-	int log; 
+	FILE *log; 
+	int ret_tprint; pthread_t tprint;
 
 }ircdata;
 ircdata irc[3];
@@ -33,7 +34,7 @@ ircdata irc[3];
 int main(int argc, char *argv[]){
 daemon(1,1); 
 if(argc==2){
-int see = chdir(argv[1]);
+chdir(argv[1]);
 }
 strcpy(irc[0].chan,"#sall");
 strcpy(irc[0].network,"irc.efnet.org");
@@ -44,12 +45,10 @@ strcpy(irc[1].network,"irc.foonetic.net");
 irc[1].port=6667;
 
 char authnick[100]; char authuser[100]; 
-int ret_tprntmsg[3]; 
 struct sockaddr_in server;
-pthread_t tprntmsg[3];
 
 int n; 
-if((mkdir("logs", S_IRWXU | S_IRWXG | S_IRWXO)) <0){
+if((mkdir("logs", S_IRWXU|S_IRWXG|S_IRWXO)) <0){
   if((chdir("logs") <0)){
 	printf("could not write to folder, permissions?\n");
 	fflush(stdout); return 0; 
@@ -63,7 +62,7 @@ char filepath[100];
 
 
 snprintf(filepath, 100, "log%s.%s.%ld",irc[n].network,irc[n].chan,time(0)); 
-irc[n].log=open(filepath,O_CREAT|O_WRONLY|O_APPEND,0666); 
+irc[n].log= fopen(filepath,"ab+"); 
 
 if((hostip((void *)&irc[n])==1)) { return 0; };
 server.sin_addr.s_addr = inet_addr(irc[n].ip);
@@ -73,7 +72,7 @@ server.sin_port = htons(irc[n].port);
 	if(connect(irc[n].irc_sock,(struct sockaddr *)&server,sizeof(server))){
 	printf("connect error\n"); fflush(stdout); return 0; 
 	}
-ret_tprntmsg[n] = pthread_create(&tprntmsg[n],NULL,prntmsg,(void*)&irc[n]);
+irc[n].ret_tprint = pthread_create(&(irc[n].tprint),NULL,prntmsg,(void*)&irc[n]);
 time_t timer = time(0);  
 snprintf(authnick, sizeof(authnick), "NICK %s%ld\n\r", getenv("USER"),timer); 
 snprintf(authuser, sizeof(authuser), "USER %s%ld 8 * Abe S. Salloum\n\r", getenv("USER"),timer); 
@@ -96,7 +95,7 @@ void* prntmsg(void *ircs){
 struct ircdata *irc = (struct ircdata*)(ircs);
  while(1){
 	recv(irc->irc_sock,irc->read,sizeof(irc->read),0); //ALL data recv happens here
-	write(irc->log, irc->read, strlen(irc->read));
+	fwrite(&irc->read, sizeof(char), strlen(irc->read), irc->log);
 getlast((void*)irc);
 chkmsg((void*)irc); 
 		if(!strncmp(irc->read,"PING",4)){ //repy to PING with PONG -ASAP
@@ -131,7 +130,7 @@ strcpy(irc->ip,inet_ntoa(*addr_list[0]));
 return 0; 
 }
 
-int getlast(void *ircs){ //Not very good: part/join messages fail
+int getlast(void *ircs){ //Not very good
 struct ircdata *irc = (struct ircdata*)(ircs);
 	if(!(strncmp(irc->read,"PING",4))){ return 0; }
 if((strchr(irc->read,'!'))==NULL){
