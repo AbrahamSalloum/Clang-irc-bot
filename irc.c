@@ -53,6 +53,7 @@ if((mkdir("logs", S_IRWXU|S_IRWXG|S_IRWXO)) <0){
 	printf("could not write to folder, permissions?\n");
 	fflush(stdout); return 0; 
   }
+chdir("logs"); 
 } 
 for(n=0;n<2;n++){
 	if((irc[n].irc_sock = socket(AF_INET,SOCK_STREAM,0)) <0){
@@ -60,9 +61,8 @@ for(n=0;n<2;n++){
 	}
 char filepath[100];
 
-
 snprintf(filepath, 100, "log%s.%s.%ld",irc[n].network,irc[n].chan,time(0)); 
-irc[n].log= fopen(filepath,"ab+"); 
+irc[n].log= fopen(filepath,"w+"); 
 
 if((hostip((void *)&irc[n])==1)) { return 0; };
 server.sin_addr.s_addr = inet_addr(irc[n].ip);
@@ -95,7 +95,7 @@ void* prntmsg(void *ircs){
 struct ircdata *irc = (struct ircdata*)(ircs);
  while(1){
 	recv(irc->irc_sock,irc->read,sizeof(irc->read),0); //ALL data recv happens here
-	fwrite(&irc->read, sizeof(char), strlen(irc->read), irc->log);
+	fwrite(&irc->read,1, strlen(irc->read), irc->log);
 getlast((void*)irc);
 chkmsg((void*)irc); 
 		if(!strncmp(irc->read,"PING",4)){ //repy to PING with PONG -ASAP
